@@ -20,13 +20,20 @@ import cv2 as cv
 
 
 def open_cam(request):
+    print(request.GET["value"], '---------------')
+    request.session["checker"] = request.GET["value"]
+    if request.session["checker"] ==  'start':
+        print("session running")
+
     cap = cv.VideoCapture(0)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
     while True:
+        # print("Inside while")
         # Capture frame-by-frame
         ret, frame = cap.read()
+        # print(ret)
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
@@ -35,14 +42,19 @@ def open_cam(request):
         normal = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         # Display the resulting frame
         cv.imshow('frame', normal)
-        break
-        if cv.waitKey(1) == ord('q'):
+
+        # check request session values
+        if request.session["checker"] ==  'save':
+            print("image saved")
+            cv.imwrite("saved_cam.png", normal)
+        cv.waitKey(10)
+        if request.session["checker"] ==  'stop':
+            print("session stopped")
             break
-    # When everything done, release the capture
-    cv.imshow('frame', normal)
-    k = cv.waitKey(0)
-    if k == ord("s"):
-        cv.imwrite("saved_webcam.png", normal)
     cap.release()
     cv.destroyAllWindows()
     return HttpResponse('Hello there')
+
+def click_done(request):
+    cv.destroyAllWindows()
+    return HttpResponse("Destroyed all windows")

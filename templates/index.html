@@ -14,18 +14,26 @@
     <h1>Enter your data</h1>
 <div class="row mx-auto">
     <div class="col-md-6">
-    <form method="POST">
+    <form method="POST" enctype=multipart/form-data>
         {% csrf_token %}
         <div class="form-group">
           <label for="name">Name</label>
           <input type="text" class="form-control" id="name" name='name' aria-describedby="emailHelp" placeholder="Enter name">
         </div>
+        <br>
         <div class="form-group">
           <label for="exampleInputEmail2">Upload files</label>
           <input type="file" class="form-control" id="exampleInputEmail2" name='fileholder' aria-describedby="emailHelp" placeholder="Enter file" multiple>
         </div>
         
         <br>
+        <button id="show_cam" class="btn btn-primary" >Show Cam</button>
+        <br>
+        <br>
+        <button id="capture_image" class="btn btn-primary" >Capture Image</button>
+        <br> <br>
+        <button id="done_cam" class="btn btn-danger" >Done with cam</button>
+        <br> <br>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
     </div>
@@ -33,14 +41,79 @@
 
 
     <!-- Optional JavaScript; choose one of the two! -->
-
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
+    
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
-    -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            console.log("Document is Ready");
+            $("#show_cam").on("click",function(e) {
+                e.preventDefault();
+                console.log('WEb cam button clicked');
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'cam' %}",
+                    data: {
+                        value:'start',
+                    },
+                    
+                    success: function(response){
+                        console.log('Success method called of ajax');
+                    },
+
+                    error: function(response){
+                        console.log("Error method called on ajax");
+                    }
+                })
+            })
+            
+            $("#done_cam").on("click",function(e) {
+                e.preventDefault();
+                console.log('Done button clicked');
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'cam' %}",
+                    data: {
+                        value:'stop',
+                    },
+                    
+                    success: function(response){
+                        console.log('Success method called of ajax');
+                    },
+
+                    error: function(response){
+                        console.log("Error method called on ajax");
+                    }
+                })
+            })
+            
+            $("#capture_image").on("click",function(e) {
+                e.preventDefault();
+                console.log('Done button clicked');
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'cam' %}",
+                    data: {
+                        value:'save',
+                    },
+                    
+                    success: function(response){
+                        console.log('Success method called of ajax');
+                    },
+
+                    error: function(response){
+                        console.log("Error method called on ajax");
+                    }
+                })
+            })
+
+        });
+    </script>
+    
   </body>
 </html>

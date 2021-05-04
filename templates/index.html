@@ -63,6 +63,7 @@
                     },
                     
                     success: function(response){
+                        console.log(response);
                         console.log('Success method called of ajax');
                     },
 
@@ -83,6 +84,7 @@
                     },
                     
                     success: function(response){
+                        console.log(response);
                         console.log('Success method called of ajax');
                     },
 
@@ -94,7 +96,7 @@
             
             $("#capture_image").on("click",function(e) {
                 e.preventDefault();
-                console.log('Done button clicked');
+                console.log('Capture button clicked');
                 $.ajax({
                     type: 'GET',
                     url: "{% url 'cam' %}",
@@ -103,6 +105,7 @@
                     },
                     
                     success: function(response){
+                        console.log(response);
                         console.log('Success method called of ajax');
                     },
 

@@ -1,15 +1,42 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_protect
+
+import os
+# from django.core.files.storage import default_storage
+# from django.core.files.base import ContentFile
+
+
+
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. '+ directory)
 
 @csrf_protect
 def home(request):
     if request.method=='GET':
+        request.session["images"] = []
         print('home called')
         return render(request, 'index.html')
     elif request.method=='POST':
-        print(request.POST)
-        print(request)
+        name = request.POST.get('name')
+        images = request.session.get('images')
+        files = request.FILES["fileholder"]
+        print(f'length of files is {len(files)}')
+        for file in files:
+            print(type(file), '_+_+__+_+_+______________+__++__+_+_+__')
+            # print(file)
+            # print(dir(file))
+            # default_storage.save(f'data/{file}', ContentFile(file.read()))
+        createFolder(f'data/{name}')
+        print(len(images))
+        print(files)
+        for index, image in enumerate(images):
+            naming = f"data/{name}/from_webcam_{index}.png"
+            cv.imwrite(naming, np.array(image, dtype='uint8'))
     return redirect('home')
 
 
@@ -17,7 +44,9 @@ def home(request):
 # working for opencv// needs ajax here
 import numpy as np
 import cv2 as cv
-
+import base64
+import io
+import matplotlib.pyplot as plt
 
 def open_cam(request):
     print(request.GET["value"], '---------------')
@@ -42,19 +71,22 @@ def open_cam(request):
         normal = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         # Display the resulting frame
         cv.imshow('frame', normal)
-
+        cv.waitKey(10) #this give chance to run imshow so image can be seen on window
         # check request session values
         if request.session["checker"] ==  'save':
+            request.session["images"].append(normal.tolist())
+            # print(normal.dtype)
+            # cv.imwrite("changed_img.png", np.array(normal.tolist()))
+            # print(request.session.items()) 
             print("image saved")
-            cv.imwrite("saved_cam.png", normal)
-        cv.waitKey(10)
+            request.session["checker"] = 'start'
         if request.session["checker"] ==  'stop':
             print("session stopped")
             break
     cap.release()
     cv.destroyAllWindows()
-    return HttpResponse('Hello there')
+    return HttpResponse('hey there')
 
 def click_done(request):
-    cv.destroyAllWindows()
+    print(request.session.items())
     return HttpResponse("Destroyed all windows")

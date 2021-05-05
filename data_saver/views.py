@@ -1,20 +1,29 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_protect
-
-import os
-# from django.core.files.storage import default_storage
-# from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.contrib import messages
 
+import os
+import numpy as np
+import cv2 as cv
+
+
+# a global variable for naming purpose
+i = 0
+folder_name = ''
+
+
+# for creating folder
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
         print('Error: Creating directory. '+ directory)
-i = 0
+
+# for home page view with form
 @csrf_protect
 def home(request):
     global i
@@ -34,27 +43,15 @@ def home(request):
         images = request.session.get('images')
         files = request.FILES.getlist("fileholder")
         fs = FileSystemStorage()
-        # createFolder(f'data/{name}')
-        settings.MEDIA_ROOT = os.path.join(settings.BASE_DIR, folder_name)
+        settings.MEDIA_ROOT = os.path.join(settings.BASE_DIR, folder_name) # setting media root to the new directory to save files
         for file in files:
             fs.save(file.name, file)
-        
-    print(request.session.items(), '00000000000000000000000000   after submitting')
-        # print(len(images))
-        # for index, image in enumerate(images):
-        #     naming = f"data/{name}/from_webcam_{index}.png"
-        #     cv.imwrite(naming, np.array(image, dtype='uint8'))
+    messages.success(request, f"File saved successfully at {folder_name}")
     return redirect('home')
 
 
 
-# working for opencv// needs ajax here
-import numpy as np
-import cv2 as cv
-import base64
-import io
-import matplotlib.pyplot as plt
-folder_name = ''
+# working with opencv and requesting via Ajax
 def open_cam(request):
     global i
     global folder_name
@@ -84,9 +81,6 @@ def open_cam(request):
         cv.waitKey(10) #this give chance to run imshow so image can be seen on window
         # check request session values
         if request.session["checker"] ==  'save':
-            name_to_save = f'image_{i}'
-            request.session[name_to_save] = i
-            print('print the request the session', request.session.items())
             image_name = f"{folder_name}/changed_img_{i}.png"
             cv.imwrite(image_name, np.array(normal.tolist()))
             i += 1
@@ -98,7 +92,3 @@ def open_cam(request):
     cap.release()
     cv.destroyAllWindows()
     return HttpResponse('hey there')
-
-def click_done(request):
-    print(request.session.items())
-    return HttpResponse("Destroyed all windows")

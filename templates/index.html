@@ -55,11 +55,13 @@
             $("#show_cam").on("click",function(e) {
                 e.preventDefault();
                 console.log('WEb cam button clicked');
+                let name = document.getElementById("name").value
                 $.ajax({
                     type: 'GET',
                     url: "{% url 'cam' %}",
                     data: {
                         value:'start',
+                        name: name,
                     },
                     
                     success: function(response){

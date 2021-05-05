@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_protect
 import os
 # from django.core.files.storage import default_storage
 # from django.core.files.base import ContentFile
-
-
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
 def createFolder(directory):
     try:
@@ -24,16 +24,22 @@ def home(request):
     elif request.method=='POST':
         name = request.POST.get('name')
         images = request.session.get('images')
-        files = request.FILES["fileholder"]
-        print(f'length of files is {len(files)}')
-        for file in files:
-            print(type(file), '_+_+__+_+_+______________+__++__+_+_+__')
-            # print(file)
+        files = request.FILES.getlist("fileholder")
+        print(request.FILES)
+        
+        fs = FileSystemStorage()
+        # filename = fs.save(files.name, files)
+        # for file in files:
+        #     print(type(file), '_+_+__+_+_+______________+__++__+_+_+__')
+        #     print(file.name)
             # print(dir(file))
             # default_storage.save(f'data/{file}', ContentFile(file.read()))
         createFolder(f'data/{name}')
+        settings.MEDIA_ROOT = os.path.join(settings.BASE_DIR, f'data/{name}')
+        for file in files:
+            fs.save(file.name, file)
         print(len(images))
-        print(files)
+        print(files, '------------------------')
         for index, image in enumerate(images):
             naming = f"data/{name}/from_webcam_{index}.png"
             cv.imwrite(naming, np.array(image, dtype='uint8'))

@@ -14,9 +14,11 @@ def createFolder(directory):
             os.makedirs(directory)
     except OSError:
         print('Error: Creating directory. '+ directory)
-
+i = 0
 @csrf_protect
 def home(request):
+    global i
+    i = 0
     if request.method=='GET':
         request.session["images"] = []
         print('home called')
@@ -25,24 +27,15 @@ def home(request):
         name = request.POST.get('name')
         images = request.session.get('images')
         files = request.FILES.getlist("fileholder")
-        print(request.FILES)
-        
         fs = FileSystemStorage()
-        # filename = fs.save(files.name, files)
-        # for file in files:
-        #     print(type(file), '_+_+__+_+_+______________+__++__+_+_+__')
-        #     print(file.name)
-            # print(dir(file))
-            # default_storage.save(f'data/{file}', ContentFile(file.read()))
         createFolder(f'data/{name}')
         settings.MEDIA_ROOT = os.path.join(settings.BASE_DIR, f'data/{name}')
         for file in files:
             fs.save(file.name, file)
-        print(len(images))
-        print(files, '------------------------')
-        for index, image in enumerate(images):
-            naming = f"data/{name}/from_webcam_{index}.png"
-            cv.imwrite(naming, np.array(image, dtype='uint8'))
+        # print(len(images))
+        # for index, image in enumerate(images):
+        #     naming = f"data/{name}/from_webcam_{index}.png"
+        #     cv.imwrite(naming, np.array(image, dtype='uint8'))
     return redirect('home')
 
 
@@ -55,6 +48,7 @@ import io
 import matplotlib.pyplot as plt
 
 def open_cam(request):
+    global i
     print(request.GET["value"], '---------------')
     request.session["checker"] = request.GET["value"]
     if request.session["checker"] ==  'start':
@@ -79,12 +73,14 @@ def open_cam(request):
         cv.imshow('frame', normal)
         cv.waitKey(10) #this give chance to run imshow so image can be seen on window
         # check request session values
+        
         if request.session["checker"] ==  'save':
-            request.session["images"].append(normal.tolist())
-            # print(normal.dtype)
-            # cv.imwrite("changed_img.png", np.array(normal.tolist()))
-            # print(request.session.items()) 
+            print(i, ret, type(request.session["images"]))
+            request.session["images"].append(i)
+            cv.imwrite(f"data/changed_img_{i}.png", np.array(normal.tolist()))
+            i += 1
             print("image saved")
+            print(len(request.session["images"]), request.session["images"])
             request.session["checker"] = 'start'
         if request.session["checker"] ==  'stop':
             print("session stopped")
